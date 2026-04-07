@@ -10,6 +10,9 @@ export default function SavePage() {
   const haptic = useHaptic();
   const [url,        setUrl]        = useState('');
   const [reason,     setReason]     = useState('');
+  const [vibe,       setVibe]       = useState('');
+  const [color,      setColor]      = useState('');
+  const [location,   setLocation]   = useState('');
   const [tag,        setTag]        = useState('');
   const [newTag,     setNewTag]     = useState('');
   const [allTags,    setAllTags]    = useState([]);
@@ -61,6 +64,9 @@ export default function SavePage() {
         thumbnail: parsed?.thumbnail || null,
         title:     parsed?.title     || null,
         reason:    reason.trim() || null,
+        vibe:      vibe.trim() || null,
+        color:     color.trim() || null,
+        location:  location.trim() || null,
         tag:       finalTag || null,
       };
 
@@ -71,6 +77,9 @@ export default function SavePage() {
       // Reset
       setUrl('');
       setReason('');
+      setVibe('');
+      setColor('');
+      setLocation('');
       setTag('');
       setNewTag('');
       setShowNewTag(false);
@@ -154,6 +163,56 @@ export default function SavePage() {
 
         {/* Voice Input */}
         <VoiceInput value={reason} onChange={setReason} />
+
+        {/* Context Fields */}
+        <div className="flex flex-col gap-3">
+          {/* Vibe */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+              Vibe
+            </label>
+            <select
+              value={vibe}
+              onChange={(e) => { setVibe(e.target.value); haptic.tap(); }}
+              className="bg-white rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 focus:border-lavender-400 focus:outline-none transition-all"
+            >
+              <option value="">Choose vibe...</option>
+              <option value="trending">Trending</option>
+              <option value="casual">Casual</option>
+              <option value="formal">Formal</option>
+              <option value="sporty">Sporty</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          {/* Color */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+              Color
+            </label>
+            <input
+              type="text"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              placeholder="e.g., red, blue, pastels..."
+              className="bg-white rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+            />
+          </div>
+
+          {/* Location */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+              Location
+            </label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g., beach, gym, bedroom..."
+              className="bg-white rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+            />
+          </div>
+        </div>
 
         {/* Tags */}
         <div className="flex flex-col gap-2">

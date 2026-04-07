@@ -38,10 +38,13 @@ function expandSearchQuery(query) {
 
 function scoreResult(video, originalTerms, expandedTerms) {
   const text = [
-    (video.title   || ''),
-    (video.reason  || ''),
-    (video.tag     || ''),
-    (video.url     || ''),
+    (video.title    || ''),
+    (video.reason   || ''),
+    (video.vibe     || ''),
+    (video.color    || ''),
+    (video.location || ''),
+    (video.tag      || ''),
+    (video.url      || ''),
     (video.platform || '')
   ].join(' ').toLowerCase();
 
