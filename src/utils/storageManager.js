@@ -33,7 +33,37 @@ function expandSearchQuery(query) {
     }
   });
 
-  return Array.from(expanded);
+  return { originalTerms: terms, expandedTerms: Array.from(expanded) };
+}
+
+function scoreResult(video, originalTerms, expandedTerms) {
+  const text = [
+    (video.title   || ''),
+    (video.reason  || ''),
+    (video.tag     || ''),
+    (video.url     || ''),
+    (video.platform || '')
+  ].join(' ').toLowerCase();
+
+  let score = 0;
+
+  // Exact matches (original search terms) = 10 points each
+  originalTerms.forEach(term => {
+    if (text.includes(term)) score += 10;
+  });
+
+  // Multi-word bonus: if 2+ original terms match, boost score
+  const matchedOriginal = originalTerms.filter(term => text.includes(term)).length;
+  if (matchedOriginal > 1) score += matchedOriginal * 5;
+
+  // Synonym matches (expanded terms not in original) = 3 points each
+  expandedTerms.forEach(term => {
+    if (!originalTerms.includes(term) && text.includes(term)) {
+      score += 3;
+    }
+  });
+
+  return score;
 }
 
 function getDB() {
@@ -75,20 +105,20 @@ export async function deleteVideo(id) {
 
 export async function searchVideos(query) {
   if (!query.trim()) return getAllVideos();
-  const all  = await getAllVideos();
-  const expandedTerms = expandSearchQuery(query);
+  const all = await getAllVideos();
+  const { originalTerms, expandedTerms } = expandSearchQuery(query);
 
-  return all.filter(v => {
-    const text = [
-      (v.title    || ''),
-      (v.reason   || ''),
-      (v.tag      || ''),
-      (v.url      || ''),
-      (v.platform || '')
-    ].join(' ').toLowerCase();
+  // Score and filter results
+  const scored = all
+    .map(v => ({
+      ...v,
+      _score: scoreResult(v, originalTerms, expandedTerms)
+    }))
+    .filter(v => v._score > 0)
+    .sort((a, b) => b._score - a._score);
 
-    return expandedTerms.some(term => text.includes(term));
-  });
+  // Remove score before returning
+  return scored.map(({ _score, ...v }) => v);
 }
 
 export async function getAllTags() {
