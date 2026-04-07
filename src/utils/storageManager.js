@@ -4,7 +4,37 @@ const DB_NAME    = 'savedreels';
 const DB_VERSION = 1;
 const STORE      = 'videos';
 
+const SYNONYMS = {
+  clothes: ['dresses', 'shirts', 'pants', 'skirts', 'tops', 'outfits', 'outfit', 'fashion', 'apparel', 'wear'],
+  dresses: ['clothes', 'outfits', 'outfit', 'apparel', 'dress'],
+  shoes: ['sneakers', 'heels', 'boots', 'footwear', 'kicks', 'sandals', 'flats'],
+  summer: ['warm', 'season', 'vacation'],
+  winter: ['cold', 'season', 'snow'],
+  spring: ['warm', 'season'],
+  fall: ['autumn', 'season'],
+  makeup: ['beauty', 'cosmetics', 'skincare'],
+  beauty: ['makeup', 'cosmetics', 'skincare', 'glam'],
+  food: ['recipe', 'cooking', 'eat', 'dish', 'meal'],
+  dance: ['movement', 'choreography', 'moves'],
+  music: ['song', 'artist', 'audio', 'beat'],
+  fitness: ['workout', 'exercise', 'gym', 'training'],
+  workout: ['fitness', 'exercise', 'gym', 'training'],
+};
+
 let dbPromise = null;
+
+function expandSearchQuery(query) {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const expanded = new Set(terms);
+
+  terms.forEach(term => {
+    if (SYNONYMS[term]) {
+      SYNONYMS[term].forEach(syn => expanded.add(syn));
+    }
+  });
+
+  return Array.from(expanded);
+}
 
 function getDB() {
   if (!dbPromise) {
@@ -46,14 +76,19 @@ export async function deleteVideo(id) {
 export async function searchVideos(query) {
   if (!query.trim()) return getAllVideos();
   const all  = await getAllVideos();
-  const q    = query.toLowerCase();
-  return all.filter(v =>
-    (v.title   || '').toLowerCase().includes(q) ||
-    (v.reason  || '').toLowerCase().includes(q) ||
-    (v.tag     || '').toLowerCase().includes(q) ||
-    (v.url     || '').toLowerCase().includes(q) ||
-    (v.platform|| '').toLowerCase().includes(q)
-  );
+  const expandedTerms = expandSearchQuery(query);
+
+  return all.filter(v => {
+    const text = [
+      (v.title    || ''),
+      (v.reason   || ''),
+      (v.tag      || ''),
+      (v.url      || ''),
+      (v.platform || '')
+    ].join(' ').toLowerCase();
+
+    return expandedTerms.some(term => text.includes(term));
+  });
 }
 
 export async function getAllTags() {
