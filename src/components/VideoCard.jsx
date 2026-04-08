@@ -18,36 +18,35 @@ export default function VideoCard({ video, onDelete, compact = false }) {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-lavender-100 overflow-hidden animate-fade-up">
-      <div className="flex gap-3 p-3">
-
-        {/* Thumbnail */}
-        <div className="relative flex-shrink-0 w-20 h-14 rounded-xl overflow-hidden bg-lavender-100">
-          {video.thumbnail ? (
-            <img
-              src={video.thumbnail}
-              alt={video.title || 'Video thumbnail'}
-              className="w-full h-full object-cover"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <div
-              className="w-full h-full flex items-center justify-center text-xs font-bold text-white rounded-xl"
-              style={{ background: bg }}
-            >
-              {(label || '?')[0]}
-            </div>
-          )}
-          {/* Platform badge */}
-          <span
-            className="absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-            style={{ background: bg, color: text }}
+      {/* Large Thumbnail */}
+      <div className="relative w-full h-28 bg-lavender-100 overflow-hidden">
+        {video.thumbnail ? (
+          <img
+            src={video.thumbnail}
+            alt={video.title || 'Video thumbnail'}
+            className="w-full h-full object-cover"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center text-3xl font-bold text-white"
+            style={{ background: bg }}
           >
-            {label}
-          </span>
-        </div>
+            {(label || '?')[0]}
+          </div>
+        )}
+        {/* Platform badge overlay */}
+        <span
+          className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded-full shadow-md"
+          style={{ background: bg, color: text }}
+        >
+          {label}
+        </span>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between gap-1">
+      <div className="flex flex-col p-3">
+        {/* Video Info */}
+        <div className="flex flex-col gap-1">
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-semibold text-lavender-800 leading-snug line-clamp-2">
               {video.title || new URL(video.url.startsWith('http') ? video.url : 'https://' + video.url).hostname}

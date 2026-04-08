@@ -19,6 +19,10 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
     const timer = setTimeout(() => runSearch(query), 200);
     return () => clearTimeout(timer);
   }, [query, runSearch]);
