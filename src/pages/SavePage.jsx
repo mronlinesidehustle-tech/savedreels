@@ -181,8 +181,27 @@ export default function SavePage() {
               <option value="casual">Casual</option>
               <option value="formal">Formal</option>
               <option value="sporty">Sporty</option>
+              <option value="y2k">Y2K</option>
+              <option value="cottagecore">Cottagecore</option>
+              <option value="dark academia">Dark Academia</option>
+              <option value="clean girl">Clean Girl</option>
+              <option value="indie">Indie</option>
+              <option value="vintage">Vintage</option>
+              <option value="minimalist">Minimalist</option>
+              <option value="grunge">Grunge</option>
+              <option value="romantic">Romantic</option>
               <option value="other">Other</option>
             </select>
+
+            {vibe === 'other' && (
+              <input
+                type="text"
+                placeholder="Describe your vibe..."
+                onChange={(e) => setVibe(e.target.value)}
+                className="bg-white rounded-2xl border-2 border-teal-400 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-teal-500 focus:outline-none transition-all animate-fade-up"
+                autoFocus
+              />
+            )}
           </div>
 
           {/* Color */}
