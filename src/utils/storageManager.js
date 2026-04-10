@@ -40,7 +40,7 @@ function scoreResult(video, originalTerms, expandedTerms) {
   const text = [
     (video.title    || ''),
     (video.reason   || ''),
-    (video.vibe     || ''),
+    (video.keywords || ''),
     (video.color    || ''),
     (video.location || ''),
     (video.tag      || ''),
@@ -104,6 +104,15 @@ export async function getVideoById(id) {
 export async function deleteVideo(id) {
   const db = await getDB();
   await db.delete(STORE, id);
+}
+
+export async function updateVideo(id, updates) {
+  const db = await getDB();
+  const existing = await db.get(STORE, id);
+  if (!existing) throw new Error('Video not found');
+  const updated = { ...existing, ...updates, id, updatedAt: Date.now() };
+  await db.put(STORE, updated);
+  return updated;
 }
 
 export async function searchVideos(query) {

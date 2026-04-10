@@ -1,15 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, Mic, MicOff, X } from 'lucide-react';
 import VideoCard from '../components/VideoCard';
+import EditModal from '../components/EditModal';
 import { searchVideos, deleteVideo } from '../utils/storageManager';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useHaptic } from '../hooks/useHaptic';
 
 export default function SearchPage() {
   const haptic = useHaptic();
-  const [query,   setQuery]   = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [query,      setQuery]      = useState('');
+  const [results,    setResults]    = useState([]);
+  const [loading,    setLoading]    = useState(false);
+  const [editVideo,  setEditVideo]  = useState(null);
 
   const runSearch = useCallback(async (q) => {
     setLoading(true);
@@ -50,8 +52,19 @@ export default function SearchPage() {
     runSearch(query);
   };
 
+  const handleSaved = (updated) => {
+    setResults(prev => prev.map(v => v.id === updated.id ? updated : v));
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {editVideo && (
+        <EditModal
+          video={editVideo}
+          onClose={() => setEditVideo(null)}
+          onSaved={handleSaved}
+        />
+      )}
 
       {/* Header + Search */}
       <div className="flex-shrink-0 px-5 pt-6 pb-4 bg-lavender-50 border-b border-lavender-100">
@@ -108,7 +121,7 @@ export default function SearchPage() {
               {query ? ` for "${query}"` : ''}
             </p>
             {results.map(video => (
-              <VideoCard key={video.id} video={video} onDelete={handleDelete} />
+              <VideoCard key={video.id} video={video} onDelete={handleDelete} onEdit={setEditVideo} />
             ))}
           </div>
         )}

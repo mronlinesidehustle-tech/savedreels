@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Grid3X3, ChevronDown, ChevronUp } from 'lucide-react';
 import VideoCard from '../components/VideoCard';
+import EditModal from '../components/EditModal';
 import { getAllVideos, getAllTags, deleteVideo } from '../utils/storageManager';
 import { useHaptic } from '../hooks/useHaptic';
 
@@ -12,6 +13,7 @@ export default function CollectionsPage() {
   const [loading,     setLoading]     = useState(true);
   const [sort,        setSort]        = useState('newest');
   const [showSort,    setShowSort]    = useState(false);
+  const [editVideo,   setEditVideo]   = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -29,12 +31,23 @@ export default function CollectionsPage() {
     load();
   };
 
+  const handleSaved = (updated) => {
+    setVideos(prev => prev.map(v => v.id === updated.id ? updated : v));
+  };
+
   const filtered = videos
     .filter(v => !activeTag || v.tag === activeTag)
     .sort((a, b) => sort === 'newest' ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
+      {editVideo && (
+        <EditModal
+          video={editVideo}
+          onClose={() => setEditVideo(null)}
+          onSaved={handleSaved}
+        />
+      )}
 
       {/* Header */}
       <div className="flex-shrink-0 px-5 pt-6 pb-3 bg-lavender-50 border-b border-lavender-100">
@@ -117,7 +130,7 @@ export default function CollectionsPage() {
               {activeTag ? ` in "${activeTag}"` : ' saved'}
             </p>
             {filtered.map(video => (
-              <VideoCard key={video.id} video={video} onDelete={handleDelete} />
+              <VideoCard key={video.id} video={video} onDelete={handleDelete} onEdit={setEditVideo} />
             ))}
           </div>
         )}

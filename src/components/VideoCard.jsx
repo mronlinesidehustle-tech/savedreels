@@ -1,4 +1,4 @@
-import { Trash2, ExternalLink } from 'lucide-react';
+import { Trash2, ExternalLink, Pencil } from 'lucide-react';
 import { getPlatformColor } from '../utils/videoParser';
 
 function timeAgo(ts) {
@@ -13,7 +13,7 @@ function timeAgo(ts) {
   return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function VideoCard({ video, onDelete, compact = false }) {
+export default function VideoCard({ video, onDelete, onEdit, compact = false }) {
   const { bg, text, label } = getPlatformColor(video.platform);
 
   return (
@@ -70,6 +70,15 @@ export default function VideoCard({ video, onDelete, compact = false }) {
             </div>
 
             <div className="flex items-center gap-1">
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(video)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-lavender-50 text-lavender-400 active:bg-lavender-100 transition-colors"
+                  aria-label="Edit"
+                >
+                  <Pencil size={13} />
+                </button>
+              )}
               <a
                 href={video.url}
                 target="_blank"
