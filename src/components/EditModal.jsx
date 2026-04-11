@@ -38,12 +38,12 @@ export default function EditModal({ video, onClose, onSaved }) {
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-[480px] bg-white rounded-t-3xl pb-safe animate-fade-up overflow-hidden">
+      <div className="w-full max-w-[480px] bg-white dark:bg-gray-800 rounded-t-3xl pb-safe animate-fade-up overflow-hidden">
 
         {/* Handle + Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-lavender-100">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-lavender-100 dark:border-gray-700">
           <div className="w-10 h-1 bg-lavender-200 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-3" />
-          <h3 className="text-base font-bold text-lavender-800">Edit Save</h3>
+          <h3 className="text-base font-bold text-lavender-800 dark:text-lavender-200">Edit Save</h3>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-xl bg-lavender-50 text-lavender-400 active:bg-lavender-100"
@@ -56,7 +56,7 @@ export default function EditModal({ video, onClose, onSaved }) {
 
           {/* Reason */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider">
               Why you saved it
             </label>
             <textarea
@@ -64,13 +64,13 @@ export default function EditModal({ video, onClose, onSaved }) {
               onChange={(e) => setReason(e.target.value)}
               placeholder="Add or update your reason..."
               rows={3}
-              className="bg-lavender-50 rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none resize-none transition-all"
+              className="bg-lavender-50 dark:bg-gray-700 rounded-2xl border-2 border-lavender-200 dark:border-gray-600 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none resize-none transition-all"
             />
           </div>
 
           {/* Keywords */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider">
               Keywords
             </label>
             <input
@@ -78,13 +78,13 @@ export default function EditModal({ video, onClose, onSaved }) {
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
               placeholder="e.g., recipe, budget, inspo..."
-              className="bg-lavender-50 rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+              className="bg-lavender-50 dark:bg-gray-700 rounded-2xl border-2 border-lavender-200 dark:border-gray-600 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
             />
           </div>
 
           {/* Tag */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider">
               Tag
             </label>
             <input
@@ -92,13 +92,13 @@ export default function EditModal({ video, onClose, onSaved }) {
               value={tag}
               onChange={(e) => setTag(e.target.value)}
               placeholder="Update or add a tag..."
-              className="bg-lavender-50 rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+              className="bg-lavender-50 dark:bg-gray-700 rounded-2xl border-2 border-lavender-200 dark:border-gray-600 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
             />
           </div>
 
           {/* Color */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider">
               Color
             </label>
             <input
@@ -106,13 +106,13 @@ export default function EditModal({ video, onClose, onSaved }) {
               value={color}
               onChange={(e) => setColor(e.target.value)}
               placeholder="e.g., red, pastels..."
-              className="bg-lavender-50 rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+              className="bg-lavender-50 dark:bg-gray-700 rounded-2xl border-2 border-lavender-200 dark:border-gray-600 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
             />
           </div>
 
           {/* Location */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider">
               Location
             </label>
             <input
@@ -120,7 +120,7 @@ export default function EditModal({ video, onClose, onSaved }) {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g., beach, gym, home..."
-              className="bg-lavender-50 rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+              className="bg-lavender-50 dark:bg-gray-700 rounded-2xl border-2 border-lavender-200 dark:border-gray-600 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
             />
           </div>
 

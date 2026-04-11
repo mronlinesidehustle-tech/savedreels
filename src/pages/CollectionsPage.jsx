@@ -70,9 +70,9 @@ export default function CollectionsPage() {
       )}
 
       {/* Header */}
-      <div className="flex-shrink-0 px-5 pt-6 pb-3 bg-lavender-50 border-b border-lavender-100">
+      <div className="flex-shrink-0 px-5 pt-6 pb-3 bg-lavender-50 dark:bg-gray-900 border-b border-lavender-100 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-lavender-800">Collection</h2>
+          <h2 className="text-xl font-bold text-lavender-800 dark:text-lavender-200">Collection</h2>
           <div className="relative">
             <button
               onClick={() => setShowSort(s => !s)}
@@ -152,7 +152,7 @@ export default function CollectionsPage() {
       </div>
 
       {/* Video list */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-4">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-4 dark:bg-gray-900">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-6 h-6 rounded-full border-2 border-lavender-300 border-t-lavender-600 animate-spin" />

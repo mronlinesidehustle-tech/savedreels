@@ -31,12 +31,12 @@ export default function VoiceInput({ value, onChange, placeholder = 'Tap mic and
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+      <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider px-1">
         Why did you save this?
       </label>
 
       <div className={`
-        relative flex items-start gap-2 rounded-2xl border-2 bg-white transition-all duration-200
+        relative flex items-start gap-2 rounded-2xl border-2 bg-white dark:bg-gray-800 transition-all duration-200
         ${isListening
           ? 'border-teal-400 shadow-lg shadow-teal-100'
           : 'border-lavender-200 focus-within:border-lavender-400'}
@@ -46,7 +46,7 @@ export default function VoiceInput({ value, onChange, placeholder = 'Tap mic and
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 resize-none rounded-2xl px-4 pt-3 pb-3 text-sm text-lavender-800 placeholder-lavender-300 bg-transparent outline-none leading-relaxed"
+          className="flex-1 resize-none rounded-2xl px-4 pt-3 pb-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 bg-transparent outline-none leading-relaxed"
         />
 
         <div className="flex flex-col gap-1 pt-2 pr-2">

@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Link2, Tag, Plus, Check, Clipboard, AlertCircle } from 'lucide-react';
+import { Link2, Tag, Plus, Check, Clipboard, AlertCircle, Sun, Moon } from 'lucide-react';
 import VoiceInput from '../components/VoiceInput';
 import Toast from '../components/Toast';
 import { saveVideo, getAllTags, findVideoByUrl, getSuggestedTags } from '../utils/storageManager';
 import { parseVideoUrl, isValidUrl } from '../utils/videoParser';
 import { useHaptic } from '../hooks/useHaptic';
 
-export default function SavePage() {
+export default function SavePage({ isDark, toggleTheme }) {
   const haptic = useHaptic();
   const [url,           setUrl]           = useState('');
   const [reason,        setReason]        = useState('');
@@ -118,24 +118,33 @@ export default function SavePage() {
 
       {/* Header */}
       <div className="px-5 pt-6 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-xl bg-lavender-300 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">SR</span>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-lavender-300 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">SR</span>
+            </div>
+            <h1 className="text-xl font-bold text-lavender-800 dark:text-lavender-200">SavedReels</h1>
           </div>
-          <h1 className="text-xl font-bold text-lavender-800">SavedReels</h1>
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-lavender-100 dark:bg-gray-700 text-lavender-500 dark:text-lavender-300 active:scale-95 transition-all"
+            aria-label="Toggle dark mode"
+          >
+            {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
         </div>
-        <p className="text-xs text-lavender-400 font-medium">Save videos. Find them later.</p>
+        <p className="text-xs text-lavender-400 dark:text-lavender-500 font-medium">Save videos. Find them later.</p>
       </div>
 
       <div className="px-5 pb-6 flex flex-col gap-5">
 
         {/* URL Input */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+          <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider px-1">
             Video URL
           </label>
           <div className={`
-            flex items-center gap-2 bg-white rounded-2xl border-2 px-4 py-3 transition-all
+            flex items-center gap-2 bg-white dark:bg-gray-800 rounded-2xl border-2 px-4 py-3 transition-all
             ${parsed ? 'border-teal-400' : 'border-lavender-200 focus-within:border-lavender-400'}
           `}>
             <Link2 size={16} className={parsed ? 'text-teal-400' : 'text-lavender-300'} />
@@ -144,7 +153,7 @@ export default function SavePage() {
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="Paste TikTok, YouTube, Instagram URL..."
-              className="flex-1 text-sm text-lavender-800 placeholder-lavender-300 bg-transparent outline-none"
+              className="flex-1 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 bg-transparent outline-none"
               inputMode="url"
               autoComplete="off"
               autoCorrect="off"
@@ -197,7 +206,7 @@ export default function SavePage() {
         <div className="flex flex-col gap-3">
           {/* Color */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider px-1">
               Color
             </label>
             <input
@@ -205,13 +214,13 @@ export default function SavePage() {
               value={color}
               onChange={(e) => setColor(e.target.value)}
               placeholder="e.g., red, blue, pastels..."
-              className="bg-white rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+              className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-lavender-200 dark:border-gray-700 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
             />
           </div>
 
           {/* Location */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+            <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider px-1">
               Location
             </label>
             <input
@@ -219,14 +228,14 @@ export default function SavePage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g., beach, gym, bedroom..."
-              className="bg-white rounded-2xl border-2 border-lavender-200 px-4 py-3 text-sm text-lavender-800 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
+              className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-lavender-200 dark:border-gray-700 px-4 py-3 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 focus:border-lavender-400 focus:outline-none transition-all"
             />
           </div>
         </div>
 
         {/* Tags */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-lavender-700 uppercase tracking-wider px-1">
+          <label className="text-xs font-semibold text-lavender-700 dark:text-lavender-400 uppercase tracking-wider px-1">
             Tag
           </label>
 
@@ -260,7 +269,7 @@ export default function SavePage() {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="New tag name..."
-                  className="flex-1 text-sm text-lavender-800 placeholder-lavender-300 bg-transparent outline-none"
+                  className="flex-1 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 bg-transparent outline-none"
                   onKeyDown={(e) => { if (e.key === 'Enter') setShowNewTag(false); }}
                 />
               </div>

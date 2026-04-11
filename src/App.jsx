@@ -4,6 +4,7 @@ import SavePage from './pages/SavePage';
 import SearchPage from './pages/SearchPage';
 import CollectionsPage from './pages/CollectionsPage';
 import { getVideoCount } from './utils/storageManager';
+import { useTheme } from './hooks/useTheme';
 
 const NUDGE_KEY   = 'sr_last_nudge_scheduled';
 const WEEK_MS     = 7 * 24 * 60 * 60 * 1000;
@@ -30,6 +31,7 @@ async function scheduleWeeklyNudge() {
 
 export default function App() {
   const [page, setPage] = useState('save');
+  const { isDark, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     // Schedule nudge after a short delay so app feels snappy on open
@@ -38,9 +40,9 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-lavender-50">
+    <div className="flex flex-col h-full bg-lavender-50 dark:bg-gray-900 transition-colors duration-200">
       <main className="flex-1 flex flex-col overflow-hidden">
-        {page === 'save'        && <SavePage />}
+        {page === 'save'        && <SavePage isDark={isDark} toggleTheme={toggleTheme} />}
         {page === 'search'      && <SearchPage />}
         {page === 'collections' && <CollectionsPage />}
       </main>

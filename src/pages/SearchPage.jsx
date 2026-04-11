@@ -67,12 +67,12 @@ export default function SearchPage() {
       )}
 
       {/* Header + Search */}
-      <div className="flex-shrink-0 px-5 pt-6 pb-4 bg-lavender-50 border-b border-lavender-100">
-        <h2 className="text-xl font-bold text-lavender-800 mb-4">Search</h2>
+      <div className="flex-shrink-0 px-5 pt-6 pb-4 bg-lavender-50 dark:bg-gray-900 border-b border-lavender-100 dark:border-gray-700">
+        <h2 className="text-xl font-bold text-lavender-800 dark:text-lavender-200 mb-4">Search</h2>
 
         <div className={`
-          flex items-center gap-3 bg-white rounded-2xl border-2 px-4 py-3 transition-all
-          ${isListening ? 'border-teal-400 shadow-teal-100 shadow-md' : 'border-lavender-200 focus-within:border-lavender-400'}
+          flex items-center gap-3 bg-white dark:bg-gray-800 rounded-2xl border-2 px-4 py-3 transition-all
+          ${isListening ? 'border-teal-400 shadow-teal-100 shadow-md' : 'border-lavender-200 dark:border-gray-700 focus-within:border-lavender-400'}
         `}>
           <Search size={16} className="text-lavender-300 flex-shrink-0" />
           <input
@@ -80,7 +80,7 @@ export default function SearchPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by title, reason, tag..."
-            className="flex-1 text-sm text-lavender-800 placeholder-lavender-300 bg-transparent outline-none"
+            className="flex-1 text-sm text-lavender-800 dark:text-lavender-200 placeholder-lavender-300 bg-transparent outline-none"
             autoComplete="off"
           />
           {query ? (
@@ -100,7 +100,7 @@ export default function SearchPage() {
       </div>
 
       {/* Results */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-4">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-4 dark:bg-gray-900">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-6 h-6 rounded-full border-2 border-lavender-300 border-t-lavender-600 animate-spin" />
@@ -110,7 +110,7 @@ export default function SearchPage() {
             <div className="w-14 h-14 rounded-2xl bg-lavender-100 flex items-center justify-center">
               <Search size={24} className="text-lavender-300" />
             </div>
-            <p className="text-sm text-lavender-400 font-medium">
+            <p className="text-sm text-lavender-400 dark:text-lavender-500 font-medium">
               {query ? `No results for "${query}"` : 'Start typing or tap the mic to search'}
             </p>
           </div>
