@@ -143,3 +143,69 @@ export async function getVideoCount() {
   const db = await getDB();
   return db.count(STORE);
 }
+
+// #5 Duplicate detection — strip query params before comparing
+function normalizeUrl(raw) {
+  try {
+    const u = new URL(raw.startsWith('http') ? raw : 'https://' + raw);
+    return u.origin + u.pathname;
+  } catch {
+    return raw.trim().toLowerCase();
+  }
+}
+
+export async function findVideoByUrl(url) {
+  const all = await getAllVideos();
+  const normalized = normalizeUrl(url);
+  return all.find(v => normalizeUrl(v.url) === normalized) || null;
+}
+
+// #6 Auto-tag suggestions — match reason words against tagged saves
+export async function getSuggestedTags(reason) {
+  if (!reason || reason.trim().length < 3) return [];
+  const all = await getAllVideos();
+  const tagged = all.filter(v => v.tag);
+  if (tagged.length === 0) return [];
+
+  const words = reason.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const tagScores = {};
+
+  tagged.forEach(v => {
+    const saved = [v.reason || '', v.keywords || '', v.tag || ''].join(' ').toLowerCase();
+    const matches = words.filter(w => saved.includes(w)).length;
+    if (matches > 0) {
+      tagScores[v.tag] = (tagScores[v.tag] || 0) + matches;
+    }
+  });
+
+  return Object.entries(tagScores)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([tag]) => tag);
+}
+
+// #4 Pattern digest — count saves in last 7 days grouped by tag/platform
+export async function getWeeklyDigest() {
+  const all = await getAllVideos();
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recent = all.filter(v => v.createdAt >= weekAgo);
+  if (recent.length === 0) return null;
+
+  const tagCounts = {};
+  const platformCounts = {};
+
+  recent.forEach(v => {
+    if (v.tag)      tagCounts[v.tag]          = (tagCounts[v.tag]          || 0) + 1;
+    if (v.platform) platformCounts[v.platform] = (platformCounts[v.platform] || 0) + 1;
+  });
+
+  const topTags = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([tag, count]) => ({ tag, count }));
+
+  const topPlatform = Object.entries(platformCounts)
+    .sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+
+  return { total: recent.length, topTags, topPlatform };
+}

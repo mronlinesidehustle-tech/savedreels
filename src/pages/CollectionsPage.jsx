@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Grid3X3, ChevronDown, ChevronUp } from 'lucide-react';
+import { Grid3X3, ChevronDown, ChevronUp, TrendingUp, X } from 'lucide-react';
 import VideoCard from '../components/VideoCard';
 import EditModal from '../components/EditModal';
-import { getAllVideos, getAllTags, deleteVideo } from '../utils/storageManager';
+import { getAllVideos, getAllTags, deleteVideo, getWeeklyDigest } from '../utils/storageManager';
 import { useHaptic } from '../hooks/useHaptic';
+
+const DIGEST_KEY = 'sr_digest_dismissed';
 
 export default function CollectionsPage() {
   const haptic = useHaptic();
@@ -14,6 +16,8 @@ export default function CollectionsPage() {
   const [sort,        setSort]        = useState('newest');
   const [showSort,    setShowSort]    = useState(false);
   const [editVideo,   setEditVideo]   = useState(null);
+  const [digest,      setDigest]      = useState(null);
+  const [showDigest,  setShowDigest]  = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -23,7 +27,17 @@ export default function CollectionsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    // #4 — show digest once per week, not on same day it was dismissed
+    const lastDismissed = parseInt(localStorage.getItem(DIGEST_KEY) || '0', 10);
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    if (lastDismissed < weekAgo) {
+      getWeeklyDigest().then(d => {
+        if (d && d.total > 0) { setDigest(d); setShowDigest(true); }
+      });
+    }
+  }, []);
 
   const handleDelete = async (id) => {
     haptic.tap();
@@ -33,6 +47,12 @@ export default function CollectionsPage() {
 
   const handleSaved = (updated) => {
     setVideos(prev => prev.map(v => v.id === updated.id ? updated : v));
+  };
+
+  const dismissDigest = () => {
+    localStorage.setItem(DIGEST_KEY, String(Date.now()));
+    setShowDigest(false);
+    haptic.tap();
   };
 
   const filtered = videos
@@ -79,6 +99,29 @@ export default function CollectionsPage() {
             )}
           </div>
         </div>
+
+        {/* #4 Pattern Digest banner */}
+        {showDigest && digest && (
+          <div className="flex items-start gap-3 bg-lavender-600 rounded-2xl px-4 py-3 mb-3 animate-fade-up">
+            <TrendingUp size={16} className="text-lavender-200 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-white">This week: {digest.total} save{digest.total !== 1 ? 's' : ''}</p>
+              {digest.topTags.length > 0 && (
+                <p className="text-xs text-lavender-200 mt-0.5">
+                  Top: {digest.topTags.map(t => `${t.tag} (${t.count})`).join(', ')}
+                </p>
+              )}
+              {digest.topPlatform && (
+                <p className="text-xs text-lavender-300 mt-0.5 capitalize">
+                  Mostly from {digest.topPlatform}
+                </p>
+              )}
+            </div>
+            <button onClick={dismissDigest} className="text-lavender-300 active:text-white transition-colors">
+              <X size={14} />
+            </button>
+          </div>
+        )}
 
         {/* Tag filter chips */}
         {tags.length > 0 && (

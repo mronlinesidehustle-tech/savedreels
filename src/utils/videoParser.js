@@ -14,10 +14,10 @@ export function detectPlatform(url) {
 
 export function extractYouTubeId(url) {
   const patterns = [
-    /youtube\.com\/watch\?v=([^&\s]+)/,
-    /youtu\.be\/([^?\s]+)/,
-    /youtube\.com\/shorts\/([^?\s]+)/,
-    /youtube\.com\/embed\/([^?\s]+)/,
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{6,16})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{6,16})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{6,16})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{6,16})/,
   ];
   for (const p of patterns) {
     const m = url.match(p);
@@ -27,6 +27,8 @@ export function extractYouTubeId(url) {
 }
 
 export function getYouTubeThumbnail(videoId) {
+  // Validate ID is safe before embedding in URL
+  if (!videoId || !/^[a-zA-Z0-9_-]{6,16}$/.test(videoId)) return null;
   return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 }
 
@@ -64,9 +66,23 @@ export function isValidUrl(url) {
   try {
     const u = url.trim();
     const full = u.startsWith('http') ? u : 'https://' + u;
-    new URL(full);
-    return full.includes('.');
+    const parsed = new URL(full);
+    // Whitelist safe protocols only — block javascript:, data:, blob: etc.
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    return parsed.hostname.includes('.');
   } catch {
     return false;
+  }
+}
+
+// Sanitize URL before rendering as href — prevents javascript: XSS
+export function safeHref(url) {
+  if (!url) return '#';
+  try {
+    const parsed = new URL(url.startsWith('http') ? url : 'https://' + url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '#';
+    return parsed.href;
+  } catch {
+    return '#';
   }
 }

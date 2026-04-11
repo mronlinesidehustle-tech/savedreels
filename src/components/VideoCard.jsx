@@ -1,5 +1,5 @@
 import { Trash2, ExternalLink, Pencil } from 'lucide-react';
-import { getPlatformColor } from '../utils/videoParser';
+import { getPlatformColor, safeHref } from '../utils/videoParser';
 
 function timeAgo(ts) {
   const diff = Date.now() - ts;
@@ -80,7 +80,7 @@ export default function VideoCard({ video, onDelete, onEdit, compact = false }) 
                 </button>
               )}
               <a
-                href={video.url}
+                href={safeHref(video.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-7 h-7 flex items-center justify-center rounded-lg bg-lavender-50 text-lavender-400 active:bg-lavender-100 transition-colors"

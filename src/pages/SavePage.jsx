@@ -1,38 +1,55 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Link2, Tag, Plus, Check, Clipboard } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Link2, Tag, Plus, Check, Clipboard, AlertCircle } from 'lucide-react';
 import VoiceInput from '../components/VoiceInput';
 import Toast from '../components/Toast';
-import { saveVideo, getAllTags } from '../utils/storageManager';
+import { saveVideo, getAllTags, findVideoByUrl, getSuggestedTags } from '../utils/storageManager';
 import { parseVideoUrl, isValidUrl } from '../utils/videoParser';
 import { useHaptic } from '../hooks/useHaptic';
 
 export default function SavePage() {
   const haptic = useHaptic();
-  const [url,        setUrl]        = useState('');
-  const [reason,     setReason]     = useState('');
-  const [color,      setColor]      = useState('');
-  const [location,   setLocation]   = useState('');
-  const [tag,        setTag]        = useState('');
-  const [newTag,     setNewTag]     = useState('');
-  const [allTags,    setAllTags]    = useState([]);
-  const [showNewTag, setShowNewTag] = useState(false);
-  const [saving,     setSaving]     = useState(false);
-  const [toast,      setToast]      = useState({ visible: false, message: '', type: 'success' });
-  const [parsed,     setParsed]     = useState(null);
+  const [url,           setUrl]           = useState('');
+  const [reason,        setReason]        = useState('');
+  const [color,         setColor]         = useState('');
+  const [location,      setLocation]      = useState('');
+  const [tag,           setTag]           = useState('');
+  const [newTag,        setNewTag]        = useState('');
+  const [allTags,       setAllTags]       = useState([]);
+  const [showNewTag,    setShowNewTag]    = useState(false);
+  const [saving,        setSaving]        = useState(false);
+  const [toast,         setToast]         = useState({ visible: false, message: '', type: 'success' });
+  const [parsed,        setParsed]        = useState(null);
+  const [duplicate,     setDuplicate]     = useState(null);   // #5
+  const [orphanWarn,    setOrphanWarn]    = useState(false);  // #2
+  const [suggestedTags, setSuggestedTags] = useState([]);     // #6
+  const reasonDebounce  = useRef(null);
 
+  useEffect(() => { getAllTags().then(setAllTags); }, []);
+
+  // #6 — debounce suggested tags on reason change
   useEffect(() => {
-    getAllTags().then(setAllTags);
-  }, []);
+    clearTimeout(reasonDebounce.current);
+    reasonDebounce.current = setTimeout(async () => {
+      const suggestions = await getSuggestedTags(reason);
+      const activeTag = showNewTag ? newTag.trim() : tag;
+      setSuggestedTags(suggestions.filter(s => s !== activeTag));
+    }, 400);
+    return () => clearTimeout(reasonDebounce.current);
+  }, [reason, tag, newTag, showNewTag]);
 
   const showToast = (message, type = 'success') => {
     setToast({ visible: true, message, type });
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 2500);
   };
 
-  const handleUrlChange = useCallback((val) => {
+  const handleUrlChange = useCallback(async (val) => {
     setUrl(val);
+    setDuplicate(null);
     if (isValidUrl(val)) {
       setParsed(parseVideoUrl(val));
+      // #5 — check for duplicate
+      const existing = await findVideoByUrl(val);
+      if (existing) setDuplicate(existing);
     } else {
       setParsed(null);
     }
@@ -48,13 +65,10 @@ export default function SavePage() {
     }
   };
 
-  const handleSave = async () => {
-    if (!url.trim())    { showToast('Paste a video URL first.', 'error');  return; }
-    if (!isValidUrl(url)) { showToast('That URL looks invalid.', 'error'); return; }
-
+  const doSave = async () => {
     haptic.tap();
     setSaving(true);
-
+    setOrphanWarn(false);
     try {
       const finalTag = showNewTag ? newTag.trim() : tag;
       const video = {
@@ -62,34 +76,38 @@ export default function SavePage() {
         platform:  parsed?.platform || 'other',
         thumbnail: parsed?.thumbnail || null,
         title:     parsed?.title     || null,
-        reason:    reason.trim() || null,
-        color:     color.trim() || null,
+        reason:    reason.trim()   || null,
+        color:     color.trim()    || null,
         location:  location.trim() || null,
-        tag:       finalTag || null,
+        tag:       finalTag        || null,
       };
-
       await saveVideo(video);
       haptic.success();
       showToast('Saved!');
-
-      // Reset
-      setUrl('');
-      setReason('');
-      setColor('');
-      setLocation('');
-      setTag('');
-      setNewTag('');
-      setShowNewTag(false);
-      setParsed(null);
-
-      // Refresh tags
+      setUrl(''); setReason(''); setColor(''); setLocation('');
+      setTag(''); setNewTag(''); setShowNewTag(false);
+      setParsed(null); setDuplicate(null); setSuggestedTags([]);
       getAllTags().then(setAllTags);
-    } catch (err) {
-      haptic.error();
+    } catch {
+      haptic.tap();
       showToast('Save failed. Try again.', 'error');
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSave = async () => {
+    if (!url.trim())      { showToast('Paste a video URL first.', 'error'); return; }
+    if (!isValidUrl(url)) { showToast('That URL looks invalid.', 'error');  return; }
+
+    // #2 — orphan check: warn if zero context
+    const finalTag = showNewTag ? newTag.trim() : tag;
+    const hasContext = reason.trim() || finalTag || color.trim() || location.trim();
+    if (!hasContext && !orphanWarn) {
+      setOrphanWarn(true);
+      return; // first tap shows warning, second tap saves anyway
+    }
+    doSave();
   };
 
   const activeTag = showNewTag ? newTag.trim() : tag;
@@ -143,10 +161,24 @@ export default function SavePage() {
           </div>
 
           {/* Platform preview */}
-          {parsed && (
+          {parsed && !duplicate && (
             <div className="flex items-center gap-2 px-1 animate-fade-up">
               <div className="w-2 h-2 rounded-full bg-teal-400" />
               <span className="text-xs text-teal-500 font-medium capitalize">{parsed.platform} detected</span>
+            </div>
+          )}
+
+          {/* #5 Duplicate warning */}
+          {duplicate && (
+            <div className="flex items-start gap-2 px-3 py-2.5 bg-peach-50 border border-peach-200 rounded-xl animate-fade-up">
+              <AlertCircle size={14} className="text-orange-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-orange-600">Already saved</p>
+                <p className="text-xs text-orange-400">
+                  You saved this on {new Date(duplicate.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
+                  Tap Save to keep both.
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -252,6 +284,35 @@ export default function SavePage() {
           )}
         </div>
 
+        {/* #6 Suggested tags */}
+        {suggestedTags.length > 0 && (
+          <div className="flex flex-col gap-2 animate-fade-up">
+            <p className="text-xs text-lavender-400 font-medium px-1">Suggested tags</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedTags.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => { setTag(s); setShowNewTag(false); haptic.tap(); setSuggestedTags([]); }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-50 text-teal-600 border border-teal-200 active:bg-teal-100 transition-all"
+                >
+                  + {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* #2 Orphan warning — shows on first Save tap with no context */}
+        {orphanWarn && (
+          <div className="flex items-start gap-2 px-3 py-2.5 bg-lavender-50 border border-lavender-200 rounded-xl animate-fade-up">
+            <AlertCircle size={14} className="text-lavender-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-lavender-500">
+              No context added — this video will be hard to find later. Add a reason, tag, or keyword. Or tap <strong>Save anyway</strong> to continue.
+            </p>
+          </div>
+        )}
+
         {/* Save Button */}
         <button
           type="button"
@@ -264,7 +325,7 @@ export default function SavePage() {
               : 'bg-lavender-600 text-white shadow-lg shadow-lavender-200 active:bg-lavender-700'}
           `}
         >
-          {saving ? 'Saving...' : activeTag ? `Save to "${activeTag}"` : 'Save Video'}
+          {saving ? 'Saving...' : orphanWarn ? 'Save anyway' : activeTag ? `Save to "${activeTag}"` : 'Save Video'}
         </button>
 
       </div>
